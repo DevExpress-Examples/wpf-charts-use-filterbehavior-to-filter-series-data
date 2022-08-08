@@ -1,154 +1,78 @@
-﻿Imports System
+Imports DevExpress.Xpf.Core
+Imports System
 Imports System.Collections.Generic
 Imports System.IO
-Imports System.Linq
 Imports System.Windows
 Imports System.Windows.Resources
 Imports System.Xml.Linq
-Imports DevExpress.Utils.Filtering
-Imports DevExpress.Xpf.Core
 
 Namespace ChartFiltering
-	Partial Public Class MainWindow
-		Inherits ThemedWindow
 
-		#Region "#MainWindow_Ctor"
-		Public Sub New()
-			InitializeComponent()
+    Public Partial Class MainWindow
+        Inherits DevExpress.Xpf.Core.ThemedWindow
 
-			Dim dataStreamInfo As StreamResourceInfo = Application.GetResourceStream(New Uri("Data/GDPStatistic.xml", UriKind.RelativeOrAbsolute))
-			Dim valueProvider As New XmlGdpValueProvider(dataStreamInfo.Stream)
-			DataContext = New MainViewModel(valueProvider)
-		End Sub
-		#End Region ' #MainWindow_Ctor
-	End Class
+        Public Sub New()
+            Me.InitializeComponent()
+            Dim dataStreamInfo As System.Windows.Resources.StreamResourceInfo = System.Windows.Application.GetResourceStream(New System.Uri("Data/GDPStatistic.xml", System.UriKind.RelativeOrAbsolute))
+            Dim valueProvider As ChartFiltering.XmlGdpValueProvider = New ChartFiltering.XmlGdpValueProvider(dataStreamInfo.Stream)
+            Me.DataContext = New ChartFiltering.MainViewModel(valueProvider)
+        End Sub
+    End Class
 
-	#Region "#MainViewModel"
-	Public Class MainViewModel
-		Private privateGdpValues As IEnumerable(Of GdpValue)
-		Public Property GdpValues() As IEnumerable(Of GdpValue)
-			Get
-				Return privateGdpValues
-			End Get
-			Private Set(ByVal value As IEnumerable(Of GdpValue))
-				privateGdpValues = value
-			End Set
-		End Property
+    Public Class MainViewModel
 
-		'Filter parameters
-		Private privateMinGdpValue As Double
-		Public Property MinGdpValue() As Double
-			Get
-				Return privateMinGdpValue
-			End Get
-			Private Set(ByVal value As Double)
-				privateMinGdpValue = value
-			End Set
-		End Property
-		Private privateMaxGdpValue As Double
-		Public Property MaxGdpValue() As Double
-			Get
-				Return privateMaxGdpValue
-			End Get
-			Private Set(ByVal value As Double)
-				privateMaxGdpValue = value
-			End Set
-		End Property
-		Private privateStartYear As Integer
-		Public Property StartYear() As Integer
-			Get
-				Return privateStartYear
-			End Get
-			Private Set(ByVal value As Integer)
-				privateStartYear = value
-			End Set
-		End Property
-		Private privateEndYear As Integer
-		Public Property EndYear() As Integer
-			Get
-				Return privateEndYear
-			End Get
-			Private Set(ByVal value As Integer)
-				privateEndYear = value
-			End Set
-		End Property
-		Private privateCountryNames As IEnumerable(Of String)
-		Public Property CountryNames() As IEnumerable(Of String)
-			Get
-				Return privateCountryNames
-			End Get
-			Private Set(ByVal value As IEnumerable(Of String))
-				privateCountryNames = value
-			End Set
-		End Property
-		Private privateContinentNames As IEnumerable(Of String)
-		Public Property ContinentNames() As IEnumerable(Of String)
-			Get
-				Return privateContinentNames
-			End Get
-			Private Set(ByVal value As IEnumerable(Of String))
-				privateContinentNames = value
-			End Set
-		End Property
+        Private _GdpValues As IEnumerable(Of ChartFiltering.GdpValue)
 
+        Public Property GdpValues As IEnumerable(Of ChartFiltering.GdpValue)
+            Get
+                Return _GdpValues
+            End Get
 
-		Public Sub New(ByVal valueProvider As XmlGdpValueProvider)
-			GdpValues = valueProvider.GetValues()
-			MinGdpValue = GdpValues.Min(Function(gdp) gdp.Value)
-			MaxGdpValue = GdpValues.Max(Function(gdp) gdp.Value)
-			StartYear = GdpValues.Min(Function(gdp) gdp.Year)
-			EndYear = GdpValues.Max(Function(gdp) gdp.Year)
-			CountryNames = GdpValues.Select(Function(gdp) gdp.CountryName)
-			ContinentNames = GdpValues.Select(Function(gdp) gdp.ContinentName)
+            Private Set(ByVal value As IEnumerable(Of ChartFiltering.GdpValue))
+                _GdpValues = value
+            End Set
+        End Property
 
-		End Sub
-	End Class
-	#End Region ' #MainViewModel
+        Public Sub New(ByVal valueProvider As ChartFiltering.XmlGdpValueProvider)
+            Me.GdpValues = valueProvider.GetValues()
+        End Sub
+    End Class
 
-	Public Class XmlGdpValueProvider
-		Private xmlStream As Stream
+    Public Class XmlGdpValueProvider
 
-		Public Sub New(ByVal xmlStream As Stream)
-			Me.xmlStream = xmlStream
-		End Sub
+        Private xmlStream As System.IO.Stream
 
-		Public Function GetValues() As IEnumerable(Of GdpValue)
-			Dim dataSet As XElement = XDocument.Load(xmlStream).Element("data-set")
-			Dim values As New List(Of GdpValue)()
-			For Each continent As XElement In dataSet.Elements("ContinentInfo")
-				Dim continentName As String = continent.Element("ContinentName").Value
-				For Each country As XElement In continent.Element("Countries").Elements("CountryInfo")
-					Dim countryName As String = country.Element("Name").Value
-					For Each gdpByYear As XElement In country.Element("Statistic").Elements("GDPByYear")
-						Dim year As Integer = Integer.Parse(gdpByYear.Element("Year").Value)
-						Dim value As Double = If(String.IsNullOrEmpty(gdpByYear.Element("GDP").Value), 0, Double.Parse(gdpByYear.Element("GDP").Value))
-						values.Add(New GdpValue With {
-							.ContinentName = continentName,
-							.CountryName = countryName,
-							.Year = year,
-							.Value = value / 1000000000000.0
-						})
-					Next gdpByYear
-				Next country
-			Next continent
+        Public Sub New(ByVal xmlStream As System.IO.Stream)
+            Me.xmlStream = xmlStream
+        End Sub
 
-			Return values
-		End Function
-	End Class
+        Public Function GetValues() As IEnumerable(Of ChartFiltering.GdpValue)
+            Dim dataSet As System.Xml.Linq.XElement = System.Xml.Linq.XDocument.Load(CType((Me.xmlStream), System.IO.Stream)).Element("data-set")
+            Dim values As System.Collections.Generic.List(Of ChartFiltering.GdpValue) = New System.Collections.Generic.List(Of ChartFiltering.GdpValue)()
+            For Each continent As System.Xml.Linq.XElement In dataSet.Elements("ContinentInfo")
+                Dim continentName As System.[String] = continent.Element(CType(("ContinentName"), System.Xml.Linq.XName)).Value
+                For Each country As System.Xml.Linq.XElement In continent.Element(CType(("Countries"), System.Xml.Linq.XName)).Elements("CountryInfo")
+                    Dim countryName As System.[String] = country.Element(CType(("Name"), System.Xml.Linq.XName)).Value
+                    For Each gdpByYear As System.Xml.Linq.XElement In country.Element(CType(("Statistic"), System.Xml.Linq.XName)).Elements("GDPByYear")
+                        Dim year As Integer = Integer.Parse(gdpByYear.Element(CType(("Year"), System.Xml.Linq.XName)).Value)
+                        Dim value As Double = If(System.[String].IsNullOrEmpty(gdpByYear.Element(CType(("GDP"), System.Xml.Linq.XName)).Value), 0, Double.Parse(gdpByYear.Element(CType(("GDP"), System.Xml.Linq.XName)).Value))
+                        values.Add(New ChartFiltering.GdpValue With {.ContinentName = continentName, .CountryName = countryName, .Year = year, .Value = value / 1000000000000.0})
+                    Next
+                Next
+            Next
 
-	#Region "#GdpValue"
-	Public Class GdpValue
-		<FilterLookup(DataSourceMember := "ContinentNames", UseBlanks := False)>
-		Public Property ContinentName() As String
+            Return values
+        End Function
+    End Class
 
-		<FilterLookup(DataSourceMember := "CountryNames", UseBlanks := False)>
-		Public Property CountryName() As String
+    Public Class GdpValue
 
-		<FilterRange(MaximumMember := "MaxGdpValue", MinimumMember := "MinGdpValue")>
-		Public Property Value() As Double
+        Public Property ContinentName As String
 
-		<FilterRange(MinimumMember := "StartYear", MaximumMember := "EndYear")>
-		Public Property Year() As Integer
-	End Class
-	#End Region ' #GdpValue
+        Public Property CountryName As String
+
+        Public Property Value As Double
+
+        Public Property Year As Integer
+    End Class
 End Namespace
