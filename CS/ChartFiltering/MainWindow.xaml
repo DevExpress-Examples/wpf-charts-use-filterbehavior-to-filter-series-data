@@ -6,36 +6,53 @@
                  xmlns:sys="clr-namespace:System;assembly=mscorlib"
                  xmlns:local="clr-namespace:ChartFiltering" 
                  xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
-                 xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+                 xmlns:dxfui="http://schemas.devexpress.com/winfx/2008/xaml/core/filteringui"
                  xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
-                 xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                 xmlns:dxa="http://schemas.devexpress.com/winfx/2008/xaml/accordion"
                  x:Class="ChartFiltering.MainWindow" mc:Ignorable="d" Title="MainWindow" Height="720" Width="1280" 
                  dx:ThemeManager.ThemeName="Office2016WhiteSE">
-    <!--region #FilterCriteriaSample-->
-    <dxmvvm:Interaction.Behaviors>
-        <dx:FilteringBehavior x:Name="filteringBehavior" SourceType="{x:Type local:GdpValue}"/>
-    </dxmvvm:Interaction.Behaviors>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <dxc:ChartControl Grid.Column="0" DataSource="{Binding GdpValues}">
+        <dxc:ChartControl Grid.Column="0" DataSource="{Binding GdpValues}" x:Name="chart">
             <dxc:ChartControl.Legends>
                 <dxc:Legend HorizontalPosition="Left" VerticalPosition="Top"/>
             </dxc:ChartControl.Legends>
             <dxc:XYDiagram2D SeriesDataMember="CountryName" >
                 <dxc:XYDiagram2D.SeriesTemplate>
-                    <dxc:LineSeries2D ArgumentDataMember="Year" ValueDataMember="Value"
-                                      FilterCriteria="{Binding ElementName=filteringBehavior, Path=FilterCriteria}">
-                        <dxc:LineSeries2D.MarkerModel>
-                            <dxc:SimpleMarker2DModel/>
-                        </dxc:LineSeries2D.MarkerModel>
-                    </dxc:LineSeries2D>
+                    <dxc:BarSideBySideSeries2D ArgumentDataMember="Year" ValueDataMember="Value"
+                                      FilterCriteria="{Binding ElementName=filterBehavior, Path=ActualFilterCriteria}"/>
                 </dxc:XYDiagram2D.SeriesTemplate>
+                <dxc:XYDiagram2D.AxisX>
+                    <dxc:AxisX2D TickmarksMinorVisible="False" >
+                        <dxc:AxisX2D.NumericScaleOptions>
+                            <dxc:ManualNumericScaleOptions AutoGrid="False" GridSpacing="1"/>
+                        </dxc:AxisX2D.NumericScaleOptions>
+                    </dxc:AxisX2D>
+                </dxc:XYDiagram2D.AxisX>
             </dxc:XYDiagram2D>
         </dxc:ChartControl>
-        <dxlc:DataLayoutControl Grid.Column="1" CurrentItem="{Binding ElementName=filteringBehavior, Path=FilteringViewModel}"/>
-        <!--endregion #FilterCriteriaSample-->
+        <dxa:AccordionControl Grid.Column="1" x:Name="accordion">
+            <dxmvvm:Interaction.Behaviors>
+                <dxfui:FilterBehavior x:Name="filterBehavior" ItemsSource="{Binding ElementName=chart, Path=DataSource}" />
+            </dxmvvm:Interaction.Behaviors>
+            <dxa:AccordionItem Header="Continent" IsExpanded="True">
+                <dxfui:CheckedListFilterElement FieldName="ContinentName"
+                                                ShowCounts="False"/>
+            </dxa:AccordionItem>
+            <dxa:AccordionItem Header="Country" IsExpanded="True">
+                <dxfui:CheckedListFilterElement FieldName="CountryName" 
+                                                Height="200" 
+                                                ShowCounts="False"/>
+            </dxa:AccordionItem>
+            <dxa:AccordionItem Header="Year" IsExpanded="True">
+                <dxfui:RangeFilterElement FieldName="Year"/>
+            </dxa:AccordionItem>
+            <dxa:AccordionItem Header="Value" IsExpanded="True">
+                <dxfui:RangeFilterElement FieldName="Value"/>
+            </dxa:AccordionItem>
+        </dxa:AccordionControl>
     </Grid>
 </dx:ThemedWindow>
