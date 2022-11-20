@@ -39,7 +39,7 @@
     <PackageReference Include="DevExpress.Data.Desktop" Version="21.1.*-*" />
     <PackageReference Include="DevExpress.Mvvm" Version="21.1.*-*" />
     <PackageReference Include="DevExpress.Printing.Core" Version="21.1.*-*" />
-    <PackageReference Include="DevExpress.Wpf" Version="21.1.10" />
+    <PackageReference Include="DevExpress.Wpf" Version="21.1.11" />
     <PackageReference Include="DevExpress.Wpf.Charts" Version="21.1.*-*" />
     <PackageReference Include="DevExpress.Wpf.Core" Version="21.1.*-*" />
     <PackageReference Include="DevExpress.Wpf.LayoutControl" Version="21.1.*-*" />
